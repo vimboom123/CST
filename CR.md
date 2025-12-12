@@ -71,7 +71,7 @@ W = \frac{c}{2 f_r} \sqrt{\frac{2}{\varepsilon_r + 1}}
 
 ---
 
-### 2.3 Permittivité effective (\varepsilon_})
+### 2.3 Permittivité effective (\varepsilon_{\text{eff}})
 
 La permittivité effective tient compte du fait qu’une partie du champ est dans l’air, l’autre dans le substrat :
 
