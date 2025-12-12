@@ -1,0 +1,505 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{hyperref}
+
+% Title and author information
+\title{Conception, modélisation et intégration d'une antenne patch microbande pour smartphone à 2,1 GHz}
+
+\author{\IEEEauthorblockN{LI YANBO}
+\IEEEauthorblockA{TP – Antenne patch microbande\\
+CST Studio Suite\\
+12 Décembre 2025}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+L'objectif de ce travail pratique est de concevoir et d'analyser une antenne patch microbande résonant à 2,1 GHz, destinée à être intégrée dans un smartphone. Le travail suit une démarche complète comprenant le dimensionnement analytique, la modélisation 3D sous CST Studio Suite, la validation par solveurs fréquentiel et temporel, l'optimisation de l'adaptation par ajout de fentes, et enfin l'étude de l'impact de l'intégration dans un boîtier smartphone. Le substrat utilisé est un FR4 ($\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm).
+\end{abstract}
+
+\section{Introduction}
+
+L'objectif de ce TP est de concevoir et d'analyser une antenne patch microbande résonant à \textbf{2,1 GHz}, destinée à être intégrée dans un smartphone.
+
+Le travail suit la démarche suivante :
+\begin{enumerate}
+    \item \textbf{Dimensionnement analytique} de l'antenne patch (largeur, longueur, substrat, ligne d'alimentation).
+    \item \textbf{Modélisation 3D sous CST} (substrat, patch, ligne microstrip, port, conditions aux limites).
+    \item \textbf{Validation de la fréquence de résonance et de l'impédance d'entrée} à l'aide des solveurs fréquentiel et temporel (et du filtre AR).
+    \item \textbf{Visualisation des champs électriques} pour illustrer l'effet de bord des antennes patch.
+    \item \textbf{Amélioration de l'adaptation} par ajout de fentes (paramètres $y_o$, $x_o$).
+    \item \textbf{Intégration dans un smartphone simplifié} (boîtier plastique + écran en verre) et étude de l'impact sur les performances.
+\end{enumerate}
+
+Le substrat utilisé est un FR4 ($\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm), conformément au poly de TP. Toute la modélisation est réalisée en unités \textbf{mm / GHz / ns} dans CST.
+
+\section{Dimensionnement analytique de l'antenne patch}
+
+\subsection{Données de base}
+
+\begin{itemize}
+    \item \textbf{Fréquence de travail visée :} $f_r = 2{,}1$ GHz $= 2{,}1 \times 10^9$ Hz
+    \item \textbf{Vitesse de la lumière :} $c = 3 \times 10^8$ m/s $= 3 \times 10^{11}$ mm/s
+    \item \textbf{Substrat :} FR4 / époxy
+    \begin{itemize}
+        \item Permittivité relative : $\varepsilon_r = 4{,}4$
+        \item Épaisseur : $h = 0{,}8$ mm
+    \end{itemize}
+\end{itemize}
+
+\subsection{Largeur du patch (W)}
+
+On utilise la formule classique :
+\begin{equation}
+W = \frac{c}{2 f_r} \sqrt{\frac{2}{\varepsilon_r + 1}}
+\end{equation}
+
+\begin{enumerate}
+    \item Demi-longueur d'onde dans l'air : $\dfrac{c}{2 f_r} = \dfrac{3\times10^{11}}{2\times 2{,}1\times10^{9}} \approx 71{,}43$ mm
+    \item Facteur diélectrique : $\sqrt{\dfrac{2}{\varepsilon_r+1}} = \sqrt{\dfrac{2}{5{,}4}} \approx 0{,}6086$
+    \item Largeur du patch : $W \approx 71{,}43 \times 0{,}6086 \approx \mathbf{43{,}47}$ mm
+\end{enumerate}
+
+\subsection{Permittivité effective ($\varepsilon_{\text{eff}}$)}
+
+La permittivité effective tient compte du fait qu'une partie du champ est dans l'air, l'autre dans le substrat :
+\begin{equation}
+\varepsilon_{\text{eff}} = \frac{\varepsilon_r + 1}{2} + \frac{\varepsilon_r - 1}{2}\left(1 + \frac{12h}{W}\right)^{-1/2}
+\end{equation}
+
+En remplaçant les valeurs :
+\begin{itemize}
+    \item $\dfrac{\varepsilon_r + 1}{2} = 2{,}7$
+    \item $\dfrac{\varepsilon_r - 1}{2} = 1{,}7$
+    \item $\dfrac{12h}{W} = \dfrac{12\times 0{,}8}{43{,}47} \approx 0{,}2208$
+    \item $\left(1 + \dfrac{12h}{W}\right)^{-1/2} \approx 0{,}905$
+\end{itemize}
+
+On obtient :
+\begin{equation}
+\varepsilon_{\text{eff}} \approx 2{,}7 + 1{,}7 \times 0{,}905 \approx \mathbf{4{,}24}
+\end{equation}
+
+\subsection{Allongement électrique ($\Delta L$)}
+
+L'effet de bord allonge électriquement le patch. L'allongement de chaque côté est donné par :
+\begin{equation}
+\Delta L = 0{,}412 h \cdot \frac{(\varepsilon_{\text{eff}} + 0{,}3)\big(\frac{W}{h} + 0{,}264\big)}{(\varepsilon_{\text{eff}} - 0{,}258)\big(\frac{W}{h} + 0{,}8\big)}
+\end{equation}
+
+Avec $\frac{W}{h} \approx 54{,}34$, on obtient numériquement : $\Delta L \approx \mathbf{0{,}37}$ mm
+
+\subsection{Longueur physique du patch (L)}
+
+La longueur électrique effective est :
+\begin{equation}
+L_{\text{eff}} = \frac{c}{2 f_r \sqrt{\varepsilon_{\text{eff}}}} \approx \frac{71{,}43}{\sqrt{4{,}24}} \approx 34{,}69\,\text{mm}
+\end{equation}
+
+La longueur physique en tenant compte des deux allongements est :
+\begin{equation}
+L = L_{\text{eff}} - 2\Delta L \approx 34{,}69 - 2\times 0{,}37 \approx \mathbf{33{,}95}\,\text{mm}
+\end{equation}
+
+\subsection{Largeur de la ligne d'alimentation (50 $\Omega$)}
+
+La ligne d'alimentation est une microligne 50 $\Omega$ réalisée sur le même substrat FR4 ($\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm). La largeur $A$ est déterminée via le macro \textbf{« Impedance Calculation → Thin Microstrip »} de CST (Fig.~\ref{fig:impedance_calc}) :
+
+\begin{itemize}
+    \item Paramètres saisis : $h = 0{,}8$ mm, $\varepsilon_r = 4{,}4$, $f = 2{,}1$ GHz.
+    \item En ajustant la largeur jusqu'à obtenir $Z_0 \approx 50\,\Omega$, on trouve :
+\end{itemize}
+\begin{equation}
+A \approx \mathbf{1{,}54}\,\text{mm} \quad (Z_0 \approx 50{,}16\,\Omega)
+\end{equation}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure1.png}
+\caption{Calcul de l'impédance de la ligne microstrip dans CST (macro Impedance Calculation, $Z_0 \approx 50\,\Omega$).}
+\label{fig:impedance_calc}
+\end{figure}
+
+\subsection{Longueur de la ligne d'alimentation}
+
+Le poly de TP impose que la longueur de la ligne d'alimentation soit égale à une demi-longueur d'onde dans l'air afin d'éviter l'excitation d'ondes évanescentes au niveau du port.
+
+La longueur d'onde dans l'air à 2,1 GHz vaut :
+\begin{equation}
+\lambda_0 = \frac{c}{f_r} = \frac{3\times 10^{11}}{2{,}1\times10^9} \approx 142{,}86\,\text{mm}
+\end{equation}
+
+On en déduit la longueur de la ligne :
+\begin{equation}
+L_{feed} = \frac{\lambda_0}{2} \approx \mathbf{71{,}43}\,\text{mm}
+\end{equation}
+
+\subsection{Paramètres récapitulatifs}
+
+Les dimensions calculées et choisies pour la modélisation sont :
+\begin{itemize}
+    \item \textbf{Substrat (FR4) :} $\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm
+    \item \textbf{Patch :} $W = 43{,}47$ mm, $L = 33{,}95$ mm
+    \item \textbf{Ligne d'alimentation (50 $\Omega$) :} largeur $A = 1{,}54$ mm, longueur $L_{feed} = 71{,}43$ mm
+    \item \textbf{Dimensions globales du substrat :} $W_{sub} = 80$ mm, $L_{sub} = 120$ mm
+\end{itemize}
+
+\section{Paramètres CST et liste de variables}
+
+\subsection{Création du projet CST}
+
+\begin{enumerate}
+    \item \textbf{Template utilisé :} \texttt{New Project → Antenna → Planar}
+    \item \textbf{Unités :}
+    \begin{itemize}
+        \item Unités de longueur : \texttt{mm}
+        \item Unités de fréquence : \texttt{GHz}
+        \item Unités de temps : \texttt{ns}
+    \end{itemize}
+    \item \textbf{Bande de fréquence :}
+    \begin{itemize}
+        \item $f_{min} = 1$ GHz
+        \item $f_{max} = 3$ GHz
+        \item Fréquence de référence : 2,1 GHz
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Définition de la liste de paramètres}
+
+Les paramètres suivants sont ajoutés dans la \textbf{Parameter List} (Fig.~\ref{fig:parameters}) :
+
+\begin{itemize}
+    \item \texttt{epsilon = 4.4} – Permittivité relative du substrat FR4
+    \item \texttt{h = 0.8} – Épaisseur du substrat en mm
+    \item \texttt{W = 43.47} – Largeur du patch en mm
+    \item \texttt{L = 33.95} – Longueur du patch en mm
+    \item \texttt{A = 1.5415} – Largeur de la ligne d'alimentation 50 $\Omega$
+    \item \texttt{L\_feed = 71.43} – Longueur de la ligne d'alimentation ($\lambda_0/2$ à 2,1 GHz)
+    \item \texttt{W\_sub = 80} – Largeur du substrat
+    \item \texttt{L\_sub = 120} – Longueur du substrat
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure2.png}
+\caption{Capture d'écran de la Parameter List dans CST avec les paramètres définis.}
+\label{fig:parameters}
+\end{figure}
+
+\section{Modélisation géométrique de l'antenne}
+
+\subsection{Substrat (FR4)}
+
+Le substrat est modélisé par un parallélépipède rectangle de dimensions $W_{sub} \times L_{sub} \times h$ :
+
+\begin{itemize}
+    \item \textbf{Nom :} \texttt{Substrate}
+    \item Coordonnées (en mm) :
+    \begin{itemize}
+        \item $X_{min} = -\dfrac{W_{sub}}{2}$, $X_{max} = +\dfrac{W_{sub}}{2}$
+        \item $Y_{min} = 0$, $Y_{max} = L_{sub}$
+        \item $Z_{min} = 0$, $Z_{max} = h$
+    \end{itemize}
+    \item \textbf{Matériau :} \texttt{FR4} (ou \texttt{Epoxy}), $\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm
+\end{itemize}
+
+\subsection{Patch (PEC)}
+
+Le patch est une surface conductrice située à la surface supérieure du substrat (plan $Z = h$) :
+
+\begin{itemize}
+    \item \textbf{Nom :} \texttt{Patch}
+    \item \textbf{Matériau :} \texttt{PEC} (Perfect Electric Conductor)
+    \item Coordonnées :
+    \begin{itemize}
+        \item $X_{min} = -\dfrac{W}{2}$, $X_{max} = +\dfrac{W}{2}$
+        \item $Y_{min} = L_{feed}$, $Y_{max} = L_{feed} + L$
+        \item $Z_{min} = h$, $Z_{max} = h$
+    \end{itemize}
+\end{itemize}
+
+\subsection{Ligne d'alimentation microstrip (Feed)}
+
+La ligne d'alimentation est une microligne de largeur $A$, de longueur $L_{feed}$ :
+
+\begin{itemize}
+    \item \textbf{Nom :} \texttt{FeedLine}
+    \item \textbf{Matériau :} \texttt{PEC}
+    \item Coordonnées :
+    \begin{itemize}
+        \item $X_{min} = -\dfrac{A}{2}$, $X_{max} = +\dfrac{A}{2}$
+        \item $Y_{min} = 0$, $Y_{max} = L_{feed}$
+        \item $Z_{min} = h$, $Z_{max} = h$
+    \end{itemize}
+\end{itemize}
+
+La Fig.~\ref{fig:antenna_3d} montre la vue 3D du patch et de la ligne d'alimentation sur le substrat.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure3.png}
+\caption{Vue 3D du patch et de la ligne d'alimentation sur le substrat (antenne complète).}
+\label{fig:antenna_3d}
+\end{figure}
+
+\subsection{Remarque sur le plan de masse}
+
+Le plan de masse infini n'est pas modélisé par un objet PEC séparé, mais par la condition aux limites Perfect E appliquée sur le plan $Z_{min} = 0$.
+
+\section{Conditions aux limites (Boundaries)}
+
+Les conditions aux limites sont configurées comme suit :
+
+\begin{itemize}
+    \item \textbf{Xmin, Xmax :} \texttt{Open (add space)}
+    \item \textbf{Ymin, Ymax :} \texttt{Open (add space)}
+    \item \textbf{Zmax :} \texttt{Open (add space)}
+    \item \textbf{Zmin :} \texttt{Electric (Et = 0)} (Perfect E)
+\end{itemize}
+
+Le plan \textbf{Zmin = 0} est imposé comme conducteur parfait (Perfect E) et joue le rôle de \textbf{plan de masse infini}.
+
+\section{Port d'alimentation et calcul du mode}
+
+\subsection{Définition du port d'alimentation}
+
+Le port est placé à l'extrémité de la ligne d'alimentation, sur la face $Y = 0$ (Fig.~\ref{fig:port_view}). Le port est défini dans le plan $Y = 0$ et doit :
+\begin{itemize}
+    \item recouvrir entièrement la section de la ligne microstrip
+    \item inclure l'épaisseur complète du substrat (de $Z = 0$ à $Z = h$)
+    \item laisser quelques millimètres d'air au-dessus de la ligne
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure4.png}
+\caption{Vue du Waveguide Port à Y = 0, montrant la section de la ligne et du substrat.}
+\label{fig:port_view}
+\end{figure}
+
+\subsection{Calcul du mode de la ligne}
+
+Pour vérifier l'impédance de la ligne, on utilise le solveur temporel en mode « calculate modes only » avec :
+\begin{itemize}
+    \item $f_{min} = 1$ GHz
+    \item $f_{max} = 3$ GHz
+\end{itemize}
+
+\subsection{Résultat : impédance de la ligne $\approx$ 50 $\Omega$}
+
+Après le calcul, l'analyse du mode du port (Fig.~\ref{fig:port_mode}) montre :
+\begin{itemize}
+    \item \textbf{Mode type :} quasi-TEM (mode fondamental de la ligne microstrip)
+    \item \textbf{Line impedance :} $Z_0 \approx 50{,}16\,\Omega$ (à $f \approx 2$ GHz)
+\end{itemize}
+
+Cette valeur est en excellent accord avec la conception analytique.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure5.png}
+\caption{Vue du mode du port (Port 1, mode 1) avec la boîte d'information affichant Line impedance $\approx$ 50 $\Omega$.}
+\label{fig:port_mode}
+\end{figure}
+
+\section{Solveur fréquentiel et premier S11}
+
+\subsection{Configuration du solveur fréquentiel}
+
+Le solveur fréquentiel est configuré avec :
+\begin{itemize}
+    \item Bande de fréquence : $f_{min} = 1$ GHz, $f_{max} = 3$ GHz
+    \item Port excité : Port 1
+\end{itemize}
+
+\subsection{Résultat : premier S11 du patch simple}
+
+On trace la magnitude de $S_{11}$ en dB sur l'intervalle 1–3 GHz (Fig.~\ref{fig:s11_simple}). La courbe obtenue présente :
+\begin{itemize}
+    \item un minimum de $|S_{11}|$ situé aux alentours de $f \approx 2{,}07$–$2{,}10$ GHz
+    \item une profondeur de ce minimum d'environ $|S_{11}|_{min} \approx -2{,}5$ dB
+\end{itemize}
+
+On en déduit que la fréquence de résonance est correcte, mais l'adaptation est mauvaise.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure6.png}
+\caption{Courbe $|S_{11}|$ (dB) obtenue avec le solveur fréquentiel pour le patch simple (sans fentes), montrant un minimum d'environ $-2{,}5$ dB vers 2,1 GHz.}
+\label{fig:s11_simple}
+\end{figure}
+
+\section{Solveur temporel, filtre AR et comparaison}
+
+\subsection{Simulation avec le solveur temporel}
+
+Le solveur temporel est configuré avec les mêmes paramètres. La courbe présente des ondulations importantes dues aux effets de fenêtre temporelle.
+
+\subsection{Application du filtre AR}
+
+Pour améliorer la qualité spectrale, on applique le filtre AR sur les signaux de port. CST recalcule les paramètres S à partir des signaux filtrés.
+
+\subsection{Comparaison des courbes S11}
+
+On superpose trois courbes (Fig.~\ref{fig:s11_comparison}) :
+\begin{itemize}
+    \item $|S_{11}|_{freq}$ : résultat du solveur fréquentiel
+    \item $|S_{11}|_{temp}$ : résultat brut du solveur temporel (avec ondulations)
+    \item $|S_{11}|_{AR}$ : résultat après filtre AR (lisse)
+\end{itemize}
+
+Les courbes $|S_{11}|_{AR}$ et $|S_{11}|_{freq}$ sont quasi confondues, validant l'utilisation du filtre AR.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure7.png}
+\caption{Comparaison des paramètres $|S_{11}|$ en dB obtenus par les différentes méthodes : temporel brut (rouge), après filtre AR (bleu), et solveur fréquentiel (vert).}
+\label{fig:s11_comparison}
+\end{figure}
+
+\section{Visualisation des champs E et effet de bord}
+
+\subsection{Mise en place du monitor de champ E}
+
+Un monitor de champ électrique est ajouté à la fréquence $f = 2{,}1$ GHz.
+
+\subsection{Visualisation du champ E sur le plan du patch}
+
+On affiche le champ E dans le plan $Z = h$ (Fig.~\ref{fig:efield}). Les observations principales sont :
+\begin{itemize}
+    \item Le champ est maximal au niveau des bords rayonnants du patch
+    \item Le champ au centre du patch est nettement plus faible
+    \item Effet de bord clairement visible
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure8.png}
+\caption{Vue 2D/3D du champ électrique à $f = 2{,}1$ GHz montrant la distribution du champ sur le patch, avec des maxima au niveau des bords rayonnants.}
+\label{fig:efield}
+\end{figure}
+
+Cette distribution confirme le modèle de cavité d'une antenne patch : les deux bords opposés se comportent comme des ouvertures rayonnantes.
+
+\section{Amélioration de l'adaptation par fentes ($y_o$, $x_o$)}
+
+\subsection{Principe des fentes (slots) $y_o$, $x_o$}
+
+On ajoute deux fentes rectangulaires symétriques de part et d'autre de la ligne d'alimentation. Ces fentes permettent de modifier l'impédance d'entrée et de la rapprocher de 50 $\Omega$.
+
+\subsection{Paramétrisation et modélisation}
+
+Deux nouveaux paramètres sont introduits :
+\begin{itemize}
+    \item \texttt{yo} : longueur des fentes le long de Y (en mm)
+    \item \texttt{xo} : largeur de chaque fente le long de X (en mm)
+\end{itemize}
+
+Les fentes sont modélisées par opération booléenne (Subtract) sur le patch (Fig.~\ref{fig:slotted_patch}).
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure9.png}
+\caption{Vue 3D du patch fendu avec les deux fentes symétriques de longueur $y_o = 8$ mm et de largeur $x_o = 5$ mm.}
+\label{fig:slotted_patch}
+\end{figure}
+
+\subsection{Méthode d'optimisation}
+
+L'optimisation a été réalisée de manière itérative :
+\begin{enumerate}
+    \item Variation de $y_o$ à $x_o$ fixé
+    \item Ajustement de $x_o$ à $y_o$ fixé
+\end{enumerate}
+
+\subsection{Résultat optimisé}
+
+Après optimisation, on obtient :
+\begin{equation}
+y_o = 8\,\text{mm}, \quad x_o = 5\,\text{mm}
+\end{equation}
+
+Les résultats montrent (Fig.~\ref{fig:s11_optimized}) :
+\begin{itemize}
+    \item Patch simple : $|S_{11,min}| \approx -2{,}5$ dB à $f \approx 2{,}07$ GHz
+    \item Patch avec fentes optimisées : $|S_{11,min}| \approx -10{,}5$ dB à $f \approx 2{,}11$ GHz
+\end{itemize}
+
+On observe une amélioration très nette de l'adaptation.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure10.png}
+\caption{Courbe $|S_{11}|$ comparant le patch simple (minimum $\approx -2{,}5$ dB) et le patch avec fentes optimisées (minimum $\approx -10{,}5$ dB).}
+\label{fig:s11_optimized}
+\end{figure}
+
+\section{Intégration dans un smartphone}
+
+\subsection{Modélisation du smartphone}
+
+Le smartphone est représenté par (Fig.~\ref{fig:smartphone}) :
+\begin{itemize}
+    \item une coque plastique, dimensions $58{,}27 \times 123{,}81 \times 7{,}62$ mm$^3$, $\varepsilon_r \approx 3$
+    \item un écran en verre, $\varepsilon_r \approx 5{,}5$
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure11.png}
+\caption{Vue 3D de l'antenne intégrée dans le smartphone (coque plastique arrondie + écran en verre).}
+\label{fig:smartphone}
+\end{figure}
+
+\subsection{Comparaison et observations}
+
+L'ajout du boîtier plastique et de l'écran en verre modifie fortement la courbe $|S_{11}|$ (Fig.~\ref{fig:s11_smartphone}) :
+
+\begin{itemize}
+    \item Glissement fréquentiel : la résonance principale se décale vers $\approx 1{,}43$ GHz
+    \item Désadaptation à 2,1 GHz : $|S_{11}|$ proche de 0 dB
+    \item Résonances supplémentaires vers $\approx 2{,}4$ GHz (modes parasites)
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{figure12.png}
+\caption{Courbes $|S_{11}|$ superposées : antenne optimisée (sans smartphone) vs $|S_{11}|_{addphone}$ (avec smartphone).}
+\label{fig:s11_smartphone}
+\end{figure}
+
+\subsection{Interprétation physique}
+
+Le comportement observé est dû à :
+\begin{enumerate}
+    \item \textbf{Augmentation de la permittivité effective} : le verre et le plastique augmentent $\varepsilon_{eff}$, entraînant un décalage vers les basses fréquences
+    \item \textbf{Modification des couplages} : apparition de modes parasites
+    \item \textbf{Réseau d'adaptation non optimal in-situ} : les fentes optimisées en espace libre ne conviennent plus
+\end{enumerate}
+
+\section{Conclusion}
+
+Une antenne patch microbande à 2,1 GHz a été dimensionnée analytiquement, modélisée sous CST, puis optimisée. Les principaux résultats sont :
+
+\begin{itemize}
+    \item Sur FR4 ($\varepsilon_r = 4{,}4$, $h = 0{,}8$ mm), les dimensions sont : $W = 43{,}47$ mm, $L = 33{,}95$ mm
+    \item La ligne microstrip 50 $\Omega$ a été validée avec $Z_0 \approx 50{,}16\,\Omega$
+    \item Le solveur temporel avec filtre AR coïncide parfaitement avec le solveur fréquentiel
+    \item La visualisation du champ E illustre clairement l'effet de bord
+    \item Les fentes optimisées ($y_o = 8$ mm, $x_o = 5$ mm) améliorent l'adaptation de $-2{,}5$ dB à $-10{,}5$ dB
+    \item L'intégration smartphone détériore les performances et nécessite une re-optimisation in-situ
+\end{itemize}
+
+L'antenne peut être efficacement adaptée à 2,1 GHz en espace libre, mais son intégration dans un smartphone nécessite une optimisation spécifique tenant compte des matériaux et de l'environnement réel.
+
+\end{document}
